@@ -14,6 +14,8 @@ To install Amazon Q CLI, simply run:
 ./install_q_cli.sh
 ```
 
+This will automatically install the latest version of Amazon Q CLI on your system.
+
 The script will automatically:
 - Detect your system architecture (x86_64 or aarch64)
 - Check your glibc version
