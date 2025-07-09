@@ -6,6 +6,7 @@
 GREEN='\033[0;32m'
 RED='\033[0;31m'
 YELLOW='\033[0;33m'
+BLUE='\033[0;34m'
 NC='\033[0m' # No Color
 
 # Function to print status messages
@@ -16,12 +17,16 @@ print_status() {
 # Function to print error messages
 print_error() {
   echo -e "${RED}[✗] $1${NC}"
-  exit 1
 }
 
 # Function to print warning messages
 print_warning() {
   echo -e "${YELLOW}[!] $1${NC}"
+}
+
+# Function to print info messages
+print_info() {
+  echo -e "${BLUE}[i] $1${NC}"
 }
 
 # Set commit message
@@ -35,6 +40,7 @@ fi
 # Check if we're in a git repository
 if ! git rev-parse --is-inside-work-tree > /dev/null 2>&1; then
   print_error "Not in a git repository. Please run this script from within a git repository."
+  exit 1
 fi
 
 # Show current branch
@@ -42,7 +48,7 @@ BRANCH=$(git branch --show-current)
 print_status "Working on branch: ${BRANCH}"
 
 # Check if remote branch exists
-REMOTE_EXISTS=$(git ls-remote --heads origin ${BRANCH} | wc -l)
+REMOTE_EXISTS=$(git ls-remote --heads origin ${BRANCH} 2>/dev/null | wc -l)
 
 if [ ${REMOTE_EXISTS} -eq 1 ]; then
   # Pull latest changes only if remote branch exists
@@ -53,7 +59,7 @@ if [ ${REMOTE_EXISTS} -eq 1 ]; then
     print_warning "Failed to pull latest changes. Continuing without pulling."
   fi
 else
-  print_warning "Remote branch '${BRANCH}' doesn't exist yet. Skipping pull."
+  print_warning "Remote branch '${BRANCH}' doesn't exist yet or couldn't be accessed. Skipping pull."
 fi
 
 # Check for changes
@@ -68,6 +74,7 @@ if git add --all; then
   print_status "Successfully added all changes"
 else
   print_error "Failed to add changes"
+  exit 1
 fi
 
 # Commit changes
@@ -76,14 +83,34 @@ if git commit -m "${MSG}"; then
   print_status "Successfully committed changes"
 else
   print_error "Failed to commit changes"
+  exit 1
 fi
 
 # Push changes
 echo "Pushing changes to remote repository..."
-if git push -u origin ${BRANCH}; then
+if git push -u origin ${BRANCH} 2>/dev/null; then
   print_status "Successfully pushed changes to remote repository"
 else
-  print_error "Failed to push changes. Check your remote repository configuration and permissions."
+  print_error "Failed to push changes."
+  print_info "This could be due to:"
+  print_info "1. Authentication issues - Make sure you have the right credentials set up"
+  print_info "2. Remote repository doesn't exist - Create it first on GitHub"
+  print_info "3. Network connectivity issues"
+  print_info ""
+  print_info "Your changes have been committed locally. To push them later, run:"
+  print_info "  git push -u origin ${BRANCH}"
+  print_info ""
+  print_info "To set up credentials, you can use:"
+  print_info "  git config --global credential.helper store"
+  print_info "  git config --global user.name \"Your Name\""
+  print_info "  git config --global user.email \"your.email@example.com\""
+  print_info ""
+  print_info "Or use SSH keys instead of HTTPS:"
+  print_info "  git remote set-url origin git@github.com:username/repository.git"
+  
+  # Exit with success since we've committed successfully
+  print_status "Local commit successful! (Push failed but that's okay)"
+  exit 0
 fi
 
 print_status "All operations completed successfully!"
