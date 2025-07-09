@@ -1,6 +1,6 @@
 # Q-CLI-Easy-Install
 
-Easy installation script for Amazon Q CLI
+Easy installation script for Amazon Q CLI on Linux systems
 
 ## Overview
 
