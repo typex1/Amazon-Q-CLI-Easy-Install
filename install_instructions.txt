@@ -1,0 +1,66 @@
+Source: https://docs.aws.amazon.com/amazonq/latest/qdeveloper-ug/command-line-installing-ssh-setup-autocomplete.html
+    Documentation
+
+Amazon Q
+
+    User Guide
+
+    Documentation
+
+Amazon Q
+
+    User Guide
+
+Installing with a zip file
+PDF
+RSS
+Focus mode
+
+The setup for Linux integration with the Amazon Q Developer CLI requires installing the appropriate file for your system, verifying the file, and installing the program.
+Install and update requirements
+
+    You must be able to extract or "unzip" the downloaded package. If your operating system doesn't have the built-in unzip command, use an equivalent.
+
+    Amazon Q for command line requires glibc 2.34 or newer, which is included by default in most major Linux distributions released since 2021.
+
+    For older distributions with glibc versions earlier than 2.34, use the special musl-based version (indicated by -musl.zip in the filename).
+
+    Amazon Q for command line is supported on 64-bit x86_64 and ARM aarch64 versions of recent distributions of Fedora, Ubuntu, and Amazon Linux 2023.
+
+Checking your glibc version
+
+To determine which version you need, check your glibc version:
+
+ldd --version
+
+If the version is 2.34 or newer, use the standard version. If it's older, use the musl version.
+To download the installation file
+
+Choose the appropriate download command based on your system architecture and glibc version:
+Standard version (glibc 2.34+)
+Linux x86-64
+
+curl --proto '=https' --tlsv1.2 -sSf "https://desktop-release.q.us-east-1.amazonaws.com/latest/q-x86_64-linux.zip" -o "q.zip"
+
+Linux ARM (aarch64)
+
+curl --proto '=https' --tlsv1.2 -sSf "https://desktop-release.q.us-east-1.amazonaws.com/latest/q-aarch64-linux.zip" -o "q.zip"
+
+Musl version (for glibc < 2.34)
+Linux x86-64 with musl
+
+curl --proto '=https' --tlsv1.2 -sSf "https://desktop-release.q.us-east-1.amazonaws.com/latest/q-x86_64-linux-musl.zip" -o "q.zip"
+
+Linux ARM (aarch64) with musl
+
+curl --proto '=https' --tlsv1.2 -sSf "https://desktop-release.q.us-east-1.amazonaws.com/latest/q-aarch64-linux-musl.zip" -o "q.zip"
+
+To install Amazon Q CLI
+
+    Unzip the installer:
+
+unzip q.zip
+
+Run the install program:
+
+./q/install.sh
