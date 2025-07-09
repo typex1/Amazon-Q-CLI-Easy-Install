@@ -1,5 +1,5 @@
 #!/bin/bash
-# Simple git workflow script with clear feedback
+# Simple git workflow script with SSH support
 # Usage: ./git-simple.sh [commit message]
 
 # Color definitions for better output
@@ -47,6 +47,21 @@ fi
 BRANCH=$(git branch --show-current)
 print_status "Working on branch: ${BRANCH}"
 
+# Check if remote branch exists
+REMOTE_EXISTS=$(git ls-remote --heads origin ${BRANCH} 2>/dev/null | wc -l)
+
+if [ ${REMOTE_EXISTS} -eq 1 ]; then
+  # Pull latest changes only if remote branch exists
+  echo "Pulling latest changes..."
+  if git pull origin ${BRANCH}; then
+    print_status "Successfully pulled latest changes"
+  else
+    print_warning "Failed to pull latest changes. Continuing without pulling."
+  fi
+else
+  print_warning "Remote branch '${BRANCH}' doesn't exist yet. Skipping pull."
+fi
+
 # Check for changes
 if [ -z "$(git status --porcelain)" ]; then
   print_warning "No changes to commit"
@@ -71,10 +86,20 @@ else
   exit 1
 fi
 
-print_status "Local commit successful!"
-print_info "To push these changes to GitHub, you'll need to set up authentication."
-print_info "Run the following command to push your changes:"
-print_info "  git push -u origin ${BRANCH}"
-print_info ""
-print_info "If you get authentication errors, you'll need to set up GitHub credentials."
-print_info "See: https://docs.github.com/en/authentication"
+# Push changes
+echo "Pushing changes to remote repository using SSH..."
+if git push -u origin ${BRANCH}; then
+  print_status "Successfully pushed changes to remote repository"
+else
+  print_error "Failed to push changes"
+  print_info "This could be due to:"
+  print_info "1. SSH key issues - Make sure your SSH key is properly set up"
+  print_info "2. Remote branch protection rules"
+  print_info "3. Network connectivity issues"
+  print_info ""
+  print_info "Your changes have been committed locally. To push them later, run:"
+  print_info "  git push -u origin ${BRANCH}"
+  exit 1
+fi
+
+print_status "All operations completed successfully!"

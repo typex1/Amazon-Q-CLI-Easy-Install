@@ -33,3 +33,7 @@ The script has been tested on Amazon Linux 2, Ubuntu, and Debian.
 ## License
 
 This project is licensed under the MIT License - see the LICENSE file for details.
+
+## Contributing
+
+Contributions are welcome! Please feel free to submit a Pull Request.
