@@ -34,6 +34,6 @@ The script has been tested on Amazon Linux 2, Ubuntu, and Debian.
 
 This project is licensed under the MIT License - see the LICENSE file for details.
 
-## Contributing
+## Support
 
-Contributions are welcome! Please feel free to submit a Pull Request.
+If you encounter any issues with the installation script, please open an issue on GitHub.
