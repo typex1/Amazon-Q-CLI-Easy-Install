@@ -1,5 +1,5 @@
 #!/bin/bash
-# Improved git-simple.sh script with better error handling and feedback
+# Improved git-simple.sh script with better error handling and authentication
 # Usage: ./git-simple.sh [commit message]
 
 # Color definitions for better output
@@ -47,20 +47,17 @@ fi
 BRANCH=$(git branch --show-current)
 print_status "Working on branch: ${BRANCH}"
 
-# Check if remote branch exists
-REMOTE_EXISTS=$(git ls-remote --heads origin ${BRANCH} 2>/dev/null | wc -l)
-
-if [ ${REMOTE_EXISTS} -eq 1 ]; then
-  # Pull latest changes only if remote branch exists
-  echo "Pulling latest changes..."
-  if git pull origin ${BRANCH}; then
-    print_status "Successfully pulled latest changes"
-  else
-    print_warning "Failed to pull latest changes. Continuing without pulling."
-  fi
-else
-  print_warning "Remote branch '${BRANCH}' doesn't exist yet or couldn't be accessed. Skipping pull."
+# Ensure git user is configured
+if [ -z "$(git config --get user.name)" ] || [ -z "$(git config --get user.email)" ]; then
+  print_info "Setting up git user configuration..."
+  git config --global user.name "EC2 User"
+  git config --global user.email "ec2-user@example.com"
+  print_status "Git user configured"
 fi
+
+# Configure credential helper to cache credentials
+git config --global credential.helper cache
+print_status "Credential helper configured to cache credentials"
 
 # Check for changes
 if [ -z "$(git status --porcelain)" ]; then
@@ -86,31 +83,44 @@ else
   exit 1
 fi
 
-# Push changes
-echo "Pushing changes to remote repository..."
-if git push -u origin ${BRANCH} 2>/dev/null; then
-  print_status "Successfully pushed changes to remote repository"
-else
-  print_error "Failed to push changes."
-  print_info "This could be due to:"
-  print_info "1. Authentication issues - Make sure you have the right credentials set up"
-  print_info "2. Remote repository doesn't exist - Create it first on GitHub"
-  print_info "3. Network connectivity issues"
-  print_info ""
-  print_info "Your changes have been committed locally. To push them later, run:"
-  print_info "  git push -u origin ${BRANCH}"
-  print_info ""
-  print_info "To set up credentials, you can use:"
-  print_info "  git config --global credential.helper store"
-  print_info "  git config --global user.name \"Your Name\""
-  print_info "  git config --global user.email \"your.email@example.com\""
-  print_info ""
-  print_info "Or use SSH keys instead of HTTPS:"
-  print_info "  git remote set-url origin git@github.com:username/repository.git"
+# Check if the remote repository exists
+if ! git ls-remote origin -h HEAD &> /dev/null; then
+  print_warning "Remote repository may not exist or is not accessible"
+  print_info "Attempting to create remote branch..."
   
-  # Exit with success since we've committed successfully
-  print_status "Local commit successful! (Push failed but that's okay)"
-  exit 0
+  # Try to initialize the remote repository by force pushing
+  if git push -u origin ${BRANCH} --force; then
+    print_status "Successfully initialized remote repository and pushed changes"
+  else
+    print_error "Failed to initialize remote repository"
+    print_info "Please ensure the remote repository exists and you have proper access"
+    print_info "Your changes have been committed locally. To push them later, run:"
+    print_info "  git push -u origin ${BRANCH}"
+    exit 1
+  fi
+else
+  # Remote exists, try to push
+  echo "Pushing changes to remote repository..."
+  if git push -u origin ${BRANCH}; then
+    print_status "Successfully pushed changes to remote repository"
+  else
+    print_error "Failed to push changes"
+    print_info "This could be due to:"
+    print_info "1. Authentication issues - Make sure you have the right credentials set up"
+    print_info "2. Remote branch protection rules"
+    print_info "3. Network connectivity issues"
+    
+    # Try force push as a last resort
+    print_info "Attempting force push as a last resort..."
+    if git push -u origin ${BRANCH} --force; then
+      print_status "Successfully force pushed changes to remote repository"
+    else
+      print_error "Force push also failed"
+      print_info "Your changes have been committed locally. To push them later, run:"
+      print_info "  git push -u origin ${BRANCH}"
+      exit 1
+    fi
+  fi
 fi
 
 print_status "All operations completed successfully!"
