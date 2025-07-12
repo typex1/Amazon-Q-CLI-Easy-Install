@@ -2,6 +2,8 @@
 
 Easy installation script for Amazon Q CLI on Linux systems
 
+Source: https://docs.aws.amazon.com/amazonq/latest/qdeveloper-ug/command-line-installing-ssh-setup-autocomplete.html
+
 ## Overview
 
 This repository provides a simple script to automate the installation of Amazon Q CLI.
