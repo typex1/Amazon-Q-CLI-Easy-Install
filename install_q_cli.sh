@@ -89,6 +89,8 @@ echo "Amazon Q CLI has been successfully installed!"
 echo ""
 echo "To start using Amazon Q CLI, run:"
 echo "~/.local/bin/q chat"
+echo "Or, even better, update the PATH variable accordingly":
+echo "export PATH=$PATH:/home/ssm-user/.local/bin"
 echo ""
 echo "For help and available commands, run:"
 echo "~/.local/bin/q --help"
