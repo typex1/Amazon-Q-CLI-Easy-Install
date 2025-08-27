@@ -4,6 +4,8 @@
 ```
 # change from ssm-user to ec2-user:
 sudo su - ec2-user
+```
+```
 # install git:
 sudo yum install git -y
 # clone the repo:
