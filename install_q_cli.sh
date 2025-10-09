@@ -6,6 +6,13 @@
 echo "=== Amazon Q CLI Easy Installer ==="
 echo "Checking your system configuration..."
 
+# Check if running on Raspberry Pi
+IS_RASPBERRY_PI=false
+if [[ -f /proc/device-tree/model ]] && grep -q "Raspberry Pi" /proc/device-tree/model; then
+    IS_RASPBERRY_PI=true
+    echo "Raspberry Pi detected - will use aarch64-linux-musl version"
+fi
+
 # Check system architecture
 ARCH=$(uname -m)
 if [[ "$ARCH" != "x86_64" && "$ARCH" != "aarch64" ]]; then
@@ -25,7 +32,10 @@ echo "glibc version detected: $GLIBC_VERSION"
 
 # Determine if we need musl version
 USE_MUSL=false
-if (( GLIBC_MAJOR < 2 || (GLIBC_MAJOR == 2 && GLIBC_MINOR < 34) )); then
+if [[ "$IS_RASPBERRY_PI" == "true" ]]; then
+    USE_MUSL=true
+    echo "Raspberry Pi detected - forcing musl version."
+elif (( GLIBC_MAJOR < 2 || (GLIBC_MAJOR == 2 && GLIBC_MINOR < 34) )); then
     USE_MUSL=true
     echo "Your system has glibc $GLIBC_VERSION, which is older than 2.34."
     echo "Will download the musl version of Amazon Q CLI."
@@ -42,7 +52,7 @@ if [[ "$ARCH" == "x86_64" ]]; then
         DOWNLOAD_URL="https://desktop-release.q.us-east-1.amazonaws.com/latest/q-x86_64-linux.zip"
     fi
 else # aarch64
-    if [[ "$USE_MUSL" == "true" ]]; then
+    if [[ "$USE_MUSL" == "true" || "$IS_RASPBERRY_PI" == "true" ]]; then
         DOWNLOAD_URL="https://desktop-release.q.us-east-1.amazonaws.com/latest/q-aarch64-linux-musl.zip"
     else
         DOWNLOAD_URL="https://desktop-release.q.us-east-1.amazonaws.com/latest/q-aarch64-linux.zip"
