@@ -60,7 +60,8 @@ else # aarch64
 fi
 
 # Create a temporary directory for installation
-TEMP_DIR=$(mktemp -d)
+TEMP_DIR=tmp
+mkdir "$TEMP_DIR"
 cd "$TEMP_DIR"
 
 echo "Downloading Amazon Q CLI from $DOWNLOAD_URL..."
