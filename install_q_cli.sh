@@ -60,6 +60,7 @@ else # aarch64
 fi
 
 # Create a temporary directory for installation
+cd ~
 TEMP_DIR=tmp
 mkdir "$TEMP_DIR"
 cd "$TEMP_DIR"
